@@ -11,6 +11,8 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultMatcher;
+import org.springframework.test.web.servlet.result.XpathResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.util.Arrays;
@@ -23,6 +25,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.xpath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 public class CustomerControllerTest extends AbstractRestControllerTest {
@@ -61,10 +64,10 @@ public class CustomerControllerTest extends AbstractRestControllerTest {
         when(customerService.getAllCustomers()).thenReturn(Arrays.asList(customer1, customer2));
 
         mockMvc.perform(get(CustomerController.BASE_URL)
-                .accept(MediaType.APPLICATION_JSON)
-                .contentType(MediaType.APPLICATION_JSON))
+                .accept(MediaType.APPLICATION_XML_VALUE)
+                .contentType(MediaType.APPLICATION_XML_VALUE))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.customers", hasSize(2)));
+                .andExpect(xpath("CustomerListDTO/customers/customers").nodeCount(2));
     }
 
     @Test
@@ -80,10 +83,10 @@ public class CustomerControllerTest extends AbstractRestControllerTest {
 
         //when
         mockMvc.perform(get(CustomerController.BASE_URL + "/1")
-                .accept(MediaType.APPLICATION_JSON)
-                .contentType(MediaType.APPLICATION_JSON))
+                .accept(MediaType.APPLICATION_XML_VALUE)
+                .contentType(MediaType.APPLICATION_XML_VALUE))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.firstname", equalTo("Michale")));
+                .andExpect(xpath("CustomerDTO/firstname").string("Michale"));
     }
 
     @Test
@@ -102,12 +105,12 @@ public class CustomerControllerTest extends AbstractRestControllerTest {
 
         //when/then
         mockMvc.perform(post(CustomerController.BASE_URL)
-                .accept(MediaType.APPLICATION_JSON)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(asJsonString(customer)))
+                .accept(MediaType.APPLICATION_XML_VALUE)
+                    .contentType(MediaType.APPLICATION_XML_VALUE)
+                    .content(asXMLString(customer)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.firstname", equalTo("Fred")))
-                .andExpect(jsonPath("$.customerUrl", equalTo(CustomerController.BASE_URL + "/1")));
+                .andExpect(xpath("CustomerDTO/firstname").string("Fred"))
+                .andExpect(xpath("CustomerDTO/customerUrl").string(CustomerController.BASE_URL + "/1"));
     }
 
     @Test
